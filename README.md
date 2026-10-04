@@ -26,7 +26,7 @@ npm install
 npm start
 ```
 Open **[http://localhost:3000](http://localhost:3000)** in your browser.
-Without `DATABASE_URL`, local development runs without accounts. Production requires PostgreSQL and the account/email secrets below.
+Without `DATABASE_URL`, accounts, sign-in, account settings, and email verification are disabled. Corrections and history work without accounts; history stays in the current browser. Add PostgreSQL only if you want multi-user accounts.
 
 ### 2. Run Test Suite
 ```bash
@@ -75,14 +75,14 @@ npm test
 - Reference comparison reports exact phrase overlap only against text the user supplies (up to 10 references). It does not search the internet and is not a plagiarism verdict.
 
 ### Deployment Notes
-- Use Node.js 20 or newer and PostgreSQL. Set `NODE_ENV=production`, `DATABASE_URL`, `APP_BASE_URL` (HTTPS), `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `SESSION_SECRET` (at least 32 random bytes), and `DATA_ENCRYPTION_KEY` (base64-encoded 32 random bytes) in the hosting provider's secret/environment settings. The server applies all SQL files in `migrations/` at startup.
+- Use Node.js 20 or newer. Without PostgreSQL, account and email features are disabled. To enable multi-user accounts, configure `DATABASE_URL`, `APP_BASE_URL` (HTTPS), `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `SESSION_SECRET`, and `DATA_ENCRYPTION_KEY`. Migrations run automatically at startup when PostgreSQL is configured.
 - The HTTPS deployment is also the Android installable PWA; Android installation is not a separate native APK.
 - Set `GEMINI_API_KEY` only for a shared server-side Gemini key; each account can instead save an encrypted key in Settings. Back up `DATA_ENCRYPTION_KEY` securely: changing or losing it prevents decrypting saved user keys and MFA secrets.
 - Use a PostgreSQL account limited to the app database, enforce encrypted database connections with your provider, and back up the database securely.
 - Configure SMTP delivery and verify account emails before opening registration.
 - Do not commit `.env`; `.gitignore` excludes it. `.env.example` contains placeholders only.
-- Deploy behind HTTPS. Production startup fails closed if database, mail, or key configuration is missing.
-- For Render, connect this repository and create a Blueprint from `render.yaml`. It provisions the web service and PostgreSQL database, generates the session/encryption secrets, and prompts for SMTP host/user/password. Render supplies the HTTPS service URL, which the app uses for verification and reset links.
+- Deploy behind HTTPS. When PostgreSQL is configured, production startup validates account, mail, and encryption settings. Without PostgreSQL, account and email features are disabled.
+- For a personal Render deployment without accounts or PostgreSQL, create or sync the Blueprint from `render.yaml`. It provisions a free Node web service only. Set `GEMINI_API_KEY` in Render's environment settings for a shared key, or configure one in the app. Free services may spin down when idle. To enable accounts later, provision PostgreSQL and add the account/email settings above.
 
 ### 4. Unlimited Text Entry
 - The editor and translation fields have no app-imposed character counter cap or truncation.
