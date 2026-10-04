@@ -635,8 +635,8 @@ function createAuth(app) {
 
   async function initialize() {
     if (!enabled) {
-      if (process.env.NODE_ENV === 'production') throw new Error('DATABASE_URL is required in production; refusing to start without account storage.');
-      console.warn('Account authentication is disabled because DATABASE_URL is not configured (development only).');
+      console.warn('Account authentication is disabled because DATABASE_URL is not configured.');
+      
       return;
     }
     const required = ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'SESSION_SECRET', 'DATA_ENCRYPTION_KEY'];
