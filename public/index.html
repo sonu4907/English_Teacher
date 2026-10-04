@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>VerbaAI Pro — Intelligent Multilingual Writing & Grammar Assistant</title>
+  <meta name="description" content="AI Grammar Checker, Writing Improver, and English Simplifier with multilingual support and real-time voice input.">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>">
+</head>
+<body class="dark-theme auth-locked">
+  <div id="authGate" class="auth-gate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <form id="authForm" class="auth-card">
+      <div class="auth-brand">Verba<span>AI</span></div>
+      <h2 id="authTitle">Your writing space</h2>
+      <p id="authMessage" class="form-hint">Sign in or create an account to continue.</p>
+      <label class="form-group" for="authEmail">
+        <span>Email</span>
+        <input id="authEmail" class="styled-input" type="email" autocomplete="email" required>
+      </label>
+      <label id="authPasswordGroup" class="form-group" for="authPassword">
+        <span>Password</span>
+        <input id="authPassword" class="styled-input" type="password" autocomplete="current-password" minlength="7" maxlength="128" required>
+      </label>
+      <label id="authCodeGroup" class="form-group hidden" for="authCode">
+        <span>Authenticator or backup code</span>
+        <input id="authCode" class="styled-input" inputmode="text" autocomplete="one-time-code" maxlength="32">
+      </label>
+      <div class="auth-actions">
+        <button id="authSubmitBtn" class="btn-primary" type="submit">Sign in</button>
+        <button id="authRegisterBtn" class="btn-secondary" type="button">Create account</button>
+      </div>
+      <div class="auth-links">
+        <button id="authForgotBtn" class="btn-link" type="button">Forgot password?</button>
+        <button id="authResendBtn" class="btn-link" type="button">Resend verification</button>
+      </div>
+      <p id="authStatusMsg" class="auth-status hidden" role="status"></p>
+    </form>
+  </div>
+  <!-- App Container -->
+  <div class="app-layout">
+    
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <div class="brand-title-wrap">
+            <h1 class="brand-title">Verba<span>AI</span></h1>
+            <span class="badge-version">Pro Studio</span>
+          </div>
+          <p class="brand-subtitle">Multilingual Writing, Grammar & Clarity Engine</p>
+        </div>
+      </div>
+
+      <!-- Language & Tone Controls -->
+      <div class="header-controls">
+        <div class="selector-group">
+          <label for="aiLanguageSelect" class="selector-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            AI Language
+          </label>
+          <select id="aiLanguageSelect" class="styled-select" aria-label="Select AI Target Language">
+            <option value="English" selected>🇬🇧 English</option>
+            <option value="Auto Detect">🌐 Auto Detect</option>
+            <option value="Hindi">🇮🇳 Hindi (हिन्दी)</option>
+            <option value="Marathi">🇮🇳 Marathi (मराठी)</option>
+            <option value="Spanish">🇪🇸 Spanish (Español)</option>
+            <option value="French">🇫🇷 French (Français)</option>
+            <option value="German">🇩🇪 German (Deutsch)</option>
+            <option value="Portuguese">🇧🇷 Portuguese (Português)</option>
+            <option value="Japanese">🇯🇵 Japanese (日本語)</option>
+            <option value="Chinese">🇨🇳 Chinese (中文)</option>
+          </select>
+        </div>
+
+        <div class="selector-group">
+          <label for="voiceLanguageSelect" class="selector-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            </svg>
+            Voice STT
+          </label>
+          <select id="voiceLanguageSelect" class="styled-select" aria-label="Select Voice Speech-to-Text Language">
+            <option value="en-IN" selected>en-IN (English - India)</option>
+            <option value="en-US">en-US (English - US)</option>
+            <option value="hi-IN">hi-IN (हिन्दी - India)</option>
+            <option value="mr-IN">mr-IN (मराठी - India)</option>
+            <option value="es-ES">es-ES (Español - Spain)</option>
+            <option value="fr-FR">fr-FR (Français - France)</option>
+            <option value="de-DE">de-DE (Deutsch - Germany)</option>
+            <option value="pt-BR">pt-BR (Português - Brazil)</option>
+            <option value="ja-JP">ja-JP (日本語 - Japan)</option>
+            <option value="zh-CN">zh-CN (中文 - China)</option>
+          </select>
+        </div>
+
+        <div class="header-actions">
+          <button id="shortcutsBtn" class="icon-btn" title="Keyboard Shortcuts (?)" aria-label="Keyboard Shortcuts">
+            <kbd>?</kbd>
+          </button>
+
+          <button id="themeToggleBtn" class="icon-btn" title="Toggle Light/Dark Theme" aria-label="Toggle Theme">
+            <svg id="themeIconSun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </button>
+
+          <button id="historyDrawerBtn" class="icon-btn" title="Correction History" aria-label="Open History">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span id="historyBadge" class="history-count">0</span>
+          </button>
+
+          <button id="settingsModalBtn" class="icon-btn" title="Settings & Gemini API Key" aria-label="Open Settings">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+          <button id="accountMenuBtn" class="account-menu-btn hidden" title="Sign out">
+            <span id="accountEmailLabel">Account</span>
+            <span aria-hidden="true">· Sign out</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Voice Recording Banner with Real-time Canvas Waveform -->
+    <div id="voiceStatusBanner" class="voice-banner hidden" role="alert">
+      <div class="voice-status-content">
+        <div class="voice-pulse-ring">
+          <span class="pulse-dot"></span>
+        </div>
+        <div class="voice-audio-visualizer-wrap">
+          <canvas id="voiceCanvas" width="160" height="24"></canvas>
+        </div>
+        <span id="voiceStatusText">Listening... speak naturally.</span>
+      </div>
+      <button id="stopVoiceBtn" class="btn-stop-voice" aria-label="Stop recording">Stop Recording</button>
+    </div>
+
+    <!-- Alert / System Notification Banner -->
+    <div id="alertBanner" class="alert-banner hidden" role="alert">
+      <span id="alertIcon">⚠️</span>
+      <span id="alertMessage">Notification</span>
+      <button id="closeAlertBtn" class="alert-close">&times;</button>
+    </div>
+
+    <!-- Quick Example Scenarios -->
+    <div class="quick-examples-container">
+      <span class="examples-label">Templates:</span>
+      <div class="quick-examples">
+        <button class="chip-btn" data-text="She dont know the answer." data-lang="English" data-mode="grammar">
+          <span>⚡</span> Contraction
+        </button>
+        <button class="chip-btn" data-text="I should of called you earlier." data-lang="English" data-mode="grammar">
+          <span>📌</span> Modal Verb
+        </button>
+        <button class="chip-btn" data-text="Their is a problem with your welcome message." data-lang="English" data-mode="grammar">
+          <span>🔀</span> Homophones
+        </button>
+        <button class="chip-btn" data-text="He go to college everyday and dont study." data-lang="English" data-mode="grammar">
+          <span>📝</span> Agreement
+        </button>
+        <button class="chip-btn" data-text="I think that we need to get in touch with them in order to help out." data-lang="English" data-mode="improve">
+          <span>💼</span> Improve
+        </button>
+        <button class="chip-btn" data-text="The committee has the capability to perform an analysis of the proposal." data-lang="English" data-mode="simple">
+          <span>💡</span> Simplify
+        </button>
+        <button class="chip-btn" data-text="मी काल कॉलेज ला गेलो." data-lang="Marathi" data-mode="grammar">
+          <span>🇮🇳</span> मराठी
+        </button>
+        <button class="chip-btn" data-text="हम कल आऊंगा." data-lang="Hindi" data-mode="grammar">
+          <span>🇮🇳</span> हिन्दी
+        </button>
+      </div>
+    </div>
+
+    <!-- Top Tab Navigation Bar -->
+    <nav class="app-tab-nav" id="appTabNav" aria-label="Main App Tabs">
+      <button class="tab-nav-item active" data-tab="editor" id="tabNavEditor" aria-controls="paneEditor" aria-current="page">
+        <span class="tab-nav-icon">✍️</span>
+        <span class="tab-nav-label">Editor</span>
+      </button>
+      <button class="tab-nav-item" data-tab="results" id="tabNavResults" aria-controls="paneResults">
+        <span class="tab-nav-icon">🔍</span>
+        <span class="tab-nav-label">Results</span>
+        <span class="tab-nav-badge hidden" id="topNavResultsBadge">0</span>
+      </button>
+      <button class="tab-nav-item desktop-only" data-tab="split" id="tabNavSplit" aria-controls="paneEditor paneResults" title="View Editor and Results side-by-side on desktop">
+        <span class="tab-nav-icon">🖥️</span>
+        <span class="tab-nav-label">Split Studio</span>
+      </button>
+      <button class="tab-nav-item" data-tab="translate" id="tabNavTranslate" aria-controls="paneTranslate">
+        <span class="tab-nav-icon">🌐</span>
+        <span class="tab-nav-label">Translate</span>
+      </button>
+      <button class="tab-nav-item" data-tab="daily-words" id="tabNavWod" aria-controls="paneDailyWords">
+        <span class="tab-nav-icon">📚</span>
+        <span class="tab-nav-label">Daily Words</span>
+      </button>
+      <button class="tab-nav-item" data-tab="history" id="tabNavHistory" aria-controls="paneHistory">
+        <span class="tab-nav-icon">📜</span>
+        <span class="tab-nav-label">History</span>
+      </button>
+    </nav>
+
+    <!-- Main Tab Views Container -->
+    <main class="workspace-container" id="workspaceContainer">
+
+      <!-- TAB PANE 1: Editor & Input Controls -->
+      <section class="tab-pane active" id="paneEditor" data-pane="editor">
+        <div class="panel editor-panel">
+        
+        <!-- Mode Tabs -->
+        <div class="mode-tabs-container">
+          <div class="mode-tabs" role="tablist">
+            <button class="mode-tab active" data-mode="grammar" role="tab" id="tabGrammar" aria-selected="true">
+              <span class="mode-icon">⚡</span>
+              <span class="mode-info">
+                <span class="mode-title">Grammar</span>
+                <span class="mode-desc">Fix spelling, syntax & punctuation</span>
+              </span>
+            </button>
+            <button class="mode-tab" data-mode="improve" role="tab" id="tabImprove" aria-selected="false">
+              <span class="mode-icon">✨</span>
+              <span class="mode-info">
+                <span class="mode-title">Improve</span>
+                <span class="mode-desc">Polished, concise & professional</span>
+              </span>
+            </button>
+            <button class="mode-tab" data-mode="simple" role="tab" id="tabSimple" aria-selected="false">
+              <span class="mode-icon">💡</span>
+              <span class="mode-info">
+                <span class="mode-title">Simple</span>
+                <span class="mode-desc">Short, accessible & translate</span>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tone & Persona Switcher Bar -->
+        <div class="tone-bar-container">
+          <span class="tone-label">Tone:</span>
+          <div class="tone-pills" id="tonePills" role="radiogroup" aria-label="Writing Tone">
+            <button class="tone-pill active" data-tone="standard" title="Default neutral tone">⚡ Std</button>
+            <button class="tone-pill" data-tone="academic" title="Rigorous, scholarly vocabulary">🎓 Acad</button>
+            <button class="tone-pill" data-tone="business" title="Crisp, executive, professional">💼 Biz</button>
+            <button class="tone-pill" data-tone="friendly" title="Warm, supportive, approachable">😊 Friendly</button>
+            <button class="tone-pill" data-tone="casual" title="Warm, conversational, easygoing">💬 Casual</button>
+            <button class="tone-pill" data-tone="persuasive" title="Impactful, compelling call-to-actions">📢 Persuade</button>
+          </div>
+        </div>
+
+        <div class="writing-context-row">
+          <label for="writingContext">Writing for</label>
+          <select id="writingContext" class="styled-select" aria-label="Choose a writing context">
+            <option value="general">General writing</option>
+            <option value="assignment">Student assignment</option>
+            <option value="email">Email</option>
+            <option value="resume">Resume or CV</option>
+            <option value="presentation">Presentation</option>
+            <option value="report">Report</option>
+          </select>
+          <span>Sets the correction context for this check.</span>
+        </div>
+
+        <!-- Textarea Dropzone Container -->
+        <div class="textarea-wrapper" id="dropZone">
+          <textarea 
+            id="inputText" 
+            placeholder="Type or paste text here…" 
+            spellcheck="false"
+            aria-label="Input sentence to check"
+          ></textarea>
+
+          <!-- Floating Voice Mic Action -->
+          <div class="voice-floating-action">
+            <button id="micBtn" class="mic-button" title="Voice Input (Speech-to-Text)" aria-label="Microphone Voice Input">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Hidden File Input for Document Upload -->
+          <input type="file" id="fileUploadInput" accept=".txt,.md,.text,.pdf,.docx,.pptx" class="hidden">
+        </div>
+
+        <!-- Readability & Statistics Bar with Tone & Formality Metrics -->
+        <div class="analytics-bar">
+          <div class="stat-pill" title="Readability Score (Flesch Reading Ease)">
+            <span class="stat-icon">📖</span>
+            <span class="stat-label">Read:</span>
+            <strong id="readabilityScore">--</strong>
+          </div>
+          <div class="stat-pill" title="Estimated reading time">
+            <span class="stat-icon">⏱️</span>
+            <span class="stat-label">Time:</span>
+            <strong id="readingTime">0s</strong>
+          </div>
+          <div class="stat-pill" title="Vocabulary complexity">
+            <span class="stat-icon">🎯</span>
+            <span class="stat-label">Level:</span>
+            <strong id="gradeLevel">Standard</strong>
+          </div>
+          <div class="stat-pill" title="Formality Score">
+            <span class="stat-icon">👔</span>
+            <span class="stat-label">Form:</span>
+            <strong id="formalityScore">--</strong>
+          </div>
+          <div class="stat-pill" title="Detected Writing Tone">
+            <span class="stat-icon">🎭</span>
+            <span class="stat-label">Tone:</span>
+            <strong id="detectedTone">Balanced</strong>
+          </div>
+        </div>
+        <p id="longSentenceNotice" class="long-sentence-notice hidden" role="status"></p>
+        <section id="writingInsights" class="writing-insights hidden" aria-live="polite" aria-label="Writing insights">
+          <strong>Writing insights</strong>
+          <div id="writingInsightList"></div>
+        </section>
+
+        <!-- Editor Footer: Counters & Utilities -->
+        <div class="editor-footer">
+          <div class="counters">
+            <span class="counter-item"><strong id="charCount">0</strong> char</span>
+            <span class="counter-dot">•</span>
+            <span class="counter-item"><strong id="wordCount">0</strong> word</span>
+            <span class="counter-dot">•</span>
+            <span class="counter-item"><strong id="sentenceCount">0</strong> sent</span>
+          </div>
+
+          <div class="editor-utilities">
+            <button id="uploadDocBtn" class="util-btn" title="Import TXT, PDF, Word (.docx), or PowerPoint (.pptx)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Import
+            </button>
+            <button id="undoBtn" class="util-btn" title="Undo replacement (Ctrl+Z)" disabled>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 7v6h6"></path>
+                <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+              </svg>
+              Undo
+            </button>
+            <button id="clearBtn" class="util-btn" title="Clear all text">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              Clear
+            </button>
+            <button id="copyInputBtn" class="util-btn" title="Copy input text">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copy
+            </button>
+            <button id="openTranslateTabBtn" class="util-btn" title="Open translator" aria-label="Open translator">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+              Translate
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Command Bar -->
+        <div class="action-bar">
+          <div class="action-bar-left">
+            <label class="live-check-toggle" title="Auto-analyze 1s after you stop typing">
+              <input type="checkbox" id="autoCheckToggle">
+              <span class="toggle-slider"></span>
+              <span class="toggle-text"><span class="live-indicator"></span> Auto-Check</span>
+            </label>
+          </div>
+          <button id="submitBtn" class="btn-primary" aria-label="Submit check">
+            <span class="btn-spinner hidden" id="submitSpinner"></span>
+            <span class="btn-icon">⚡</span>
+            <span class="btn-label" id="submitBtnLabel">Check</span>
+            <span class="kbd-hint">Ctrl + ↵</span>
+          </button>
+        </div>
+
+        <details class="writing-tools-panel">
+          <summary id="writingToolsTitle">More writing tools <span>Gemini</span></summary>
+          <div class="writing-tools-controls">
+            <button id="completeTextBtn" class="btn-secondary btn-sm">Continue sentence</button>
+            <button id="summarizeTextBtn" class="btn-secondary btn-sm">Summarize</button>
+            <label class="rewrite-style-control" for="rewriteStyleSelect">Rewrite style</label>
+            <select id="rewriteStyleSelect" class="styled-select">
+              <option value="professional">Professional</option>
+              <option value="academic">Academic</option>
+              <option value="friendly">Friendly</option>
+              <option value="casual">Casual</option>
+            </select>
+            <button id="rewriteTextBtn" class="btn-secondary btn-sm">Rephrase</button>
+          </div>
+          <div id="writingToolResult" class="writing-tool-result hidden" aria-live="polite">
+            <p id="writingToolOutput"></p>
+            <div class="writing-tool-actions">
+              <button id="copyWritingToolBtn" class="btn-secondary btn-sm">Copy</button>
+              <button id="insertWritingToolBtn" class="btn-secondary btn-sm">Replace editor text</button>
+            </div>
+          </div>
+        </details>
+
+        </div>
+      </section>
+
+      <!-- TAB PANE 2: Results, Core Loop, Diff & Changes -->
+      <section class="tab-pane" id="paneResults" data-pane="results">
+        <div class="panel results-panel">
+
+        <!-- Mobile Results Navigation Bar -->
+        <div class="results-mobile-toolbar">
+          <button id="backToEditorBtn" class="btn-secondary btn-sm" title="Return to Editor">
+            <span>✍️ Back to Editor</span>
+          </button>
+          <button id="quickReplaceBtn" class="btn-primary btn-sm" title="Apply corrected sentence and return to editor">
+            <span>↻ Replace &amp; Edit</span>
+          </button>
+        </div>
+        
+        <!-- Header for Results -->
+        <div class="results-header">
+          <div class="results-title-group">
+            <h2 class="results-title">Analysis & Corrections</h2>
+            <span id="activeModeBadge" class="badge-mode">Grammar</span>
+            <span id="sourceEngineBadge" class="badge-engine">AI Active</span>
+          </div>
+
+          <div class="results-top-actions">
+            <!-- Diff Mode Switcher: Inline vs Side-by-Side -->
+            <div class="diff-view-segmented" id="diffModeSwitcher">
+              <button id="diffModeInline" class="segmented-btn active" title="Inline word-level diff">Inline</button>
+              <button id="diffModeSplit" class="segmented-btn" title="Side-by-side comparison">Split View</button>
+            </div>
+            <button id="shareCorrectedBtn" class="btn-secondary btn-sm" type="button">Share</button>
+          </div>
+        </div>
+
+        <!-- Empty State Prompt -->
+        <div id="resultsEmptyState" class="empty-state">
+          <div class="empty-state-graphic">
+            <div class="pulse-circle">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
+          </div>
+          <h3>Ready for your writing</h3>
+          <p>Type a sentence, drop a text file, or click 🎤 to speak. Choose from <strong>Grammar Check</strong>, <strong>Improve</strong>, or <strong>Simple English</strong>.</p>
+          <div class="shortcut-tip">
+            Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to inspect instantly
+          </div>
+        </div>
+
+        <!-- Loaded Results Container -->
+        <div id="resultsContent" class="results-content hidden">
+
+          <!-- 1. CORRECTED SENTENCE CARD -->
+          <div class="result-card primary-card">
+            <div class="card-header">
+              <div class="card-tag tag-corrected">
+                <span class="status-indicator"></span>
+                <span>CORRECTED</span>
+              </div>
+              <div class="card-actions">
+                <!-- TTS Controls with Speed -->
+                <button id="speakCorrectedBtn" class="card-action-btn" title="Listen to sentence">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                  </svg>
+                  <span id="speakBtnText">Listen</span>
+                </button>
+                <select id="ttsSpeedSelect" class="card-action-select" title="Speech Speed">
+                  <option value="0.8">0.8x</option>
+                  <option value="1.0" selected>1.0x</option>
+                  <option value="1.2">1.2x</option>
+                </select>
+
+                <button id="copyCorrectedBtn" class="card-action-btn" title="Copy corrected text (Ctrl+Shift+C)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  Copy
+                </button>
+                <button id="replaceWithCorrectedBtn" class="card-action-btn highlight" title="Replace original text in editor">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                  </svg>
+                  Replace
+                </button>
+                
+                <!-- Export Dropdown -->
+                <div class="dropdown-wrapper">
+                  <button id="exportDropdownBtn" class="card-action-btn" title="Export options">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Export ▾
+                  </button>
+                  <div id="exportDropdownMenu" class="dropdown-menu hidden">
+                    <button class="dropdown-item" id="exportTxtBtn">Plain Text (.txt)</button>
+                    <button class="dropdown-item" id="exportMdBtn">Markdown (.md)</button>
+                    <button class="dropdown-item" id="exportPrintBtn">Print Report</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Plain display -->
+            <div id="correctedTextDisplay" class="corrected-text-body"></div>
+
+            <!-- Inline Diff Container -->
+            <div id="visualDiffContainer" class="visual-diff-body"></div>
+
+            <!-- Split View Diff Container (Side-by-side) -->
+            <div id="splitDiffContainer" class="split-diff-body hidden">
+              <div class="split-diff-col">
+                <span class="split-diff-label">Original</span>
+                <div id="splitDiffOriginal" class="split-diff-text"></div>
+              </div>
+              <div class="split-diff-divider"></div>
+              <div class="split-diff-col">
+                <span class="split-diff-label">Corrected</span>
+                <div id="splitDiffCorrected" class="split-diff-text"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. INTERACTIVE CHANGES CARD -->
+          <div class="result-card">
+            <div class="card-header">
+              <div class="card-tag tag-changes">
+                <span>CHANGES</span>
+              </div>
+              <div class="card-actions">
+                <div class="changes-filter-pills" id="changesFilterPills">
+                  <button class="change-filter-pill active" data-filter="all">All</button>
+                  <button class="change-filter-pill" data-filter="grammar">Grammar</button>
+                  <button class="change-filter-pill" data-filter="spelling">Spelling</button>
+                  <button class="change-filter-pill" data-filter="style">Style</button>
+                </div>
+                <button id="acceptAllChangesBtn" class="card-action-btn highlight hidden" title="Apply all changes to editor">
+                  ✓ Accept All
+                </button>
+                <span id="changesCountBadge" class="badge-mini">0 modifications</span>
+              </div>
+            </div>
+            <div id="changesList" class="changes-list">
+              <!-- Dynamically populated with individual Apply buttons -->
+            </div>
+          </div>
+
+          <!-- 3. EXPLANATION CARD (≤ 15 words) -->
+          <div class="result-card">
+            <div class="card-header">
+              <div class="card-tag tag-explanation">
+                <span>EXPLANATION</span>
+              </div>
+              <span class="badge-mini text-muted">≤ 15 words</span>
+            </div>
+            <p id="explanationText" class="explanation-text"></p>
+          </div>
+
+          <!-- 4. BETTER VERSIONS CARD (2-3 Alternatives) -->
+          <div id="betterVersionCard" class="result-card better-card hidden">
+            <div class="card-header">
+              <div class="card-tag tag-better">
+                <span>BETTER VERSIONS</span>
+              </div>
+              <span class="badge-mini text-muted">2-3 Alternatives</span>
+            </div>
+            <!-- Dynamic container for 2-3 alternative sentences -->
+            <div id="betterVersionsList" class="better-versions-list"></div>
+            <!-- Backward compatibility elements -->
+            <p id="betterVersionText" class="better-version-text hidden"></p>
+            <button id="useBetterVersionBtn" class="card-action-btn highlight hidden">Use This</button>
+          </div>
+
+          <!-- Raw Structured Output Accordion (Exact verbatim contract) -->
+          <details class="raw-output-accordion">
+            <summary>View Exact LLM Backend Response Structure</summary>
+            <pre id="rawOutputBlock" class="raw-output-code"></pre>
+          </details>
+
+        </div>
+        </div>
+      </section>
+
+      <!-- TAB PANE 3: Dedicated Language Translator -->
+      <section class="tab-pane" id="paneTranslate" data-pane="translate">
+        <div class="panel tab-inner-panel">
+          <div class="tab-panel-header">
+            <div class="tab-header-title-wrap">
+              <span class="tab-header-badge-icon">🌐</span>
+              <div>
+                <h2 class="tab-header-title">Language Translator</h2>
+                <p class="tab-header-subtitle">Instant translation between English, Marathi, Hindi and 10+ languages</p>
+              </div>
+            </div>
+            <button id="tabTranslatePasteBtn" class="btn-secondary btn-sm" title="Paste current editor text into translator">
+              📋 Paste Editor Text
+            </button>
+          </div>
+
+          <!-- Language Selector Bar -->
+          <div class="translator-lang-bar">
+            <div class="lang-select-group">
+              <label class="lang-label" for="tabTranslateFromLang">From</label>
+              <select id="tabTranslateFromLang" class="styled-select">
+                <option value="en" selected>🇬🇧 English</option>
+                <option value="mr">🇮🇳 Marathi (मराठी)</option>
+                <option value="hi">🇮🇳 Hindi (हिन्दी)</option>
+                <option value="es">🇪🇸 Spanish</option>
+                <option value="fr">🇫🇷 French</option>
+                <option value="de">🇩🇪 German</option>
+                <option value="ja">🇯🇵 Japanese</option>
+                <option value="zh">🇨🇳 Chinese</option>
+              </select>
+            </div>
+
+            <button id="tabSwapLangBtn" class="swap-lang-btn" title="Swap languages" aria-label="Swap Languages">⇄</button>
+
+            <div class="lang-select-group">
+              <label class="lang-label" for="tabTranslateToLang">To</label>
+              <select id="tabTranslateToLang" class="styled-select">
+                <option value="mr" selected>🇮🇳 Marathi (मराठी)</option>
+                <option value="hi">🇮🇳 Hindi (हिन्दी)</option>
+                <option value="en">🇬🇧 English</option>
+                <option value="es">🇪🇸 Spanish</option>
+                <option value="fr">🇫🇷 French</option>
+                <option value="de">🇩🇪 German</option>
+                <option value="ja">🇯🇵 Japanese</option>
+                <option value="zh">🇨🇳 Chinese</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Translator Grid -->
+          <div class="translator-main-grid">
+            <div class="translator-card">
+              <div class="translator-card-header">
+                <span class="card-caption">Source Text</span>
+                <span id="tabTranslateCharCount" class="translate-char-count">0 chars</span>
+              </div>
+              <textarea id="tabTranslateInput" class="tab-translator-textarea" placeholder="Type or paste text to translate... e.g. 'Good morning, how are you?'"></textarea>
+              <div class="translator-card-footer">
+                <button id="tabTranslateClearBtn" class="util-btn">Clear</button>
+                <button id="tabDoTranslateBtn" class="btn-primary">
+                  <span id="tabTranslateSpinner" class="btn-spinner hidden"></span>
+                  <span>🌐 Translate</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="translator-card">
+              <div class="translator-card-header">
+                <span class="card-caption">Translated Output</span>
+                <span class="translate-source-caption">Powered by MyMemory (Free)</span>
+              </div>
+              <div id="tabTranslateOutput" class="tab-translator-output">
+                <span class="placeholder-text">Translation will appear here…</span>
+              </div>
+              <div class="translator-card-footer">
+                <button id="tabCopyTranslationBtn" class="util-btn">📋 Copy</button>
+                <button id="tabSpeakTranslationBtn" class="util-btn">🔊 Listen</button>
+                <button id="tabInsertEditorBtn" class="util-btn highlight">✍️ Send to Editor</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Daily Phrases -->
+          <div class="quick-phrases-box">
+            <span class="quick-phrases-title">💡 Useful Daily Phrases (tap to translate):</span>
+            <div class="quick-phrase-chips">
+              <button class="phrase-chip" data-phrase="Good morning, have a wonderful day!">Good morning</button>
+              <button class="phrase-chip" data-phrase="How are you doing today?">How are you?</button>
+              <button class="phrase-chip" data-phrase="Thank you very much for your help.">Thank you</button>
+              <button class="phrase-chip" data-phrase="Nice to meet you.">Nice to meet you</button>
+              <button class="phrase-chip" data-phrase="Where is the train station?">Where is the station?</button>
+              <button class="phrase-chip" data-phrase="I need some help with this.">I need help</button>
+              <button class="phrase-chip" data-phrase="Can you please explain this to me?">Please explain</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB PANE 4: Dedicated Daily Words -->
+      <section class="tab-pane" id="paneDailyWords" data-pane="daily-words">
+        <div class="panel tab-inner-panel">
+          <div class="tab-panel-header">
+            <div class="tab-header-title-wrap">
+              <span class="tab-header-badge-icon">📚</span>
+              <div>
+                <h2 class="tab-header-title">Daily Word Builder</h2>
+                <p class="tab-header-subtitle" id="tabWodDate">Learn 5 English words daily with Marathi meanings</p>
+              </div>
+            </div>
+            <span id="tabWodCounterBadge" class="badge-version">Word 1 of 5</span>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="wod-progress-bar">
+            <div id="tabWodProgressFill" class="wod-progress-fill" style="width: 20%;"></div>
+          </div>
+
+          <!-- Word Display Card Container -->
+          <div id="tabWodCardContainer" class="tab-wod-card-container">
+            <div class="wod-loading">Loading today's vocabulary…</div>
+          </div>
+
+          <!-- Word Actions -->
+          <div class="tab-wod-actions">
+            <button id="tabWodSkipBtn" class="btn-secondary btn-lg" title="Skip if you already know this word">
+              <span>⏭ Already Know It (Replace)</span>
+            </button>
+            <button id="tabWodPronounceBtn" class="btn-secondary btn-lg" title="Hear English pronunciation">
+              <span>🔊 Pronounce</span>
+            </button>
+            <button id="tabWodNextBtn" class="btn-primary btn-lg" title="Go to next word">
+              <span>Next Word →</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB PANE 5: Dedicated History & App Settings -->
+      <section class="tab-pane" id="paneHistory" data-pane="history">
+        <div class="panel tab-inner-panel">
+          <div class="tab-panel-header">
+            <div class="tab-header-title-wrap">
+              <span class="tab-header-badge-icon">📜</span>
+              <div>
+                <h2 class="tab-header-title">Correction History &amp; Tools</h2>
+                <p class="tab-header-subtitle">Review past sentences and restore them with one click</p>
+              </div>
+            </div>
+            <button id="tabClearHistoryBtn" class="btn-text-danger" title="Clear all history">Clear All</button>
+          </div>
+
+          <!-- History items list -->
+          <div id="tabHistoryList" class="tab-history-items-list">
+            <p class="history-empty">No history recorded yet.</p>
+          </div>
+
+          <section class="learning-dashboard" aria-labelledby="learningDashboardTitle">
+            <div class="dashboard-heading">
+              <div>
+                <h3 id="learningDashboardTitle">Learning dashboard</h3>
+                <p>Patterns from your recent saved checks on this device.</p>
+              </div>
+            </div>
+            <div class="dashboard-stats">
+              <div class="dashboard-stat"><span>Checks</span><strong id="dashboardChecks">0</strong></div>
+              <div class="dashboard-stat"><span>Words checked</span><strong id="dashboardWords">0</strong></div>
+              <div class="dashboard-stat"><span>Edits suggested</span><strong id="dashboardEdits">0</strong></div>
+              <div class="dashboard-stat"><span>Estimated score</span><strong id="dashboardScore">--</strong></div>
+            </div>
+            <div class="dashboard-patterns">
+              <h4>Common correction types</h4>
+              <div id="dashboardCategories"><p class="dashboard-empty">Run a grammar check to see your patterns.</p></div>
+            </div>
+            <p class="dashboard-note">Based on up to 20 recent checks. It is a learning aid, not a proficiency score.</p>
+          </section>
+
+          <section class="similarity-tool" aria-labelledby="similarityToolTitle">
+            <div class="dashboard-heading">
+              <div>
+                <h3 id="similarityToolTitle">Compare with reference text</h3>
+                <p>Checks exact phrase overlap with text you provide. This does not search the web or determine plagiarism.</p>
+              </div>
+            </div>
+            <label for="similarityText">Your text</label>
+            <textarea id="similarityText" class="similarity-textarea" placeholder="Paste your draft here..."></textarea>
+            <label for="similaritySources">Reference text (you can add up to 10; separate them with a line containing ---)</label>
+            <textarea id="similaritySources" class="similarity-textarea" placeholder="Paste source text here..."></textarea>
+            <button id="runSimilarityCheckBtn" class="btn-secondary btn-sm">Compare text</button>
+            <div id="similarityResults" class="similarity-results hidden" aria-live="polite"></div>
+          </section>
+
+          <!-- Mobile App Settings Cards -->
+          <div class="mobile-settings-section">
+            <h3 class="section-title">⚙️ Preferences &amp; AI Configuration</h3>
+            
+            <div class="mobile-setting-card">
+              <div class="setting-info">
+                <span class="setting-title">🌓 Theme Mode</span>
+                <span class="setting-desc">Switch between Dark Obsidian and Crisp Light</span>
+              </div>
+              <button id="tabThemeToggleBtn" class="btn-secondary btn-sm">Toggle Theme</button>
+            </div>
+
+            <div class="mobile-setting-card">
+              <div class="setting-info">
+                <span class="setting-title">⚡ Google Gemini AI Key</span>
+                <span class="setting-desc">Manage your API key for advanced Gemini Flash intelligence</span>
+              </div>
+              <button id="tabOpenApiKeyBtn" class="btn-secondary btn-sm">Configure Key</button>
+            </div>
+
+            <div class="mobile-setting-card">
+              <div class="setting-info">
+                <span class="setting-title">⌨️ Keyboard Shortcuts</span>
+                <span class="setting-desc">View shortcuts cheatsheet (Ctrl+Enter, etc.)</span>
+              </div>
+              <button id="tabOpenShortcutsBtn" class="btn-secondary btn-sm">View Shortcuts</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer Shortcuts & Status -->
+    <footer class="app-footer">
+      <div class="footer-shortcuts">
+        <span><kbd>Ctrl</kbd> + <kbd>Enter</kbd> Check Grammar</span>
+        <span><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd> Copy Correction</span>
+        <span><kbd>Ctrl</kbd> + <kbd>Z</kbd> Undo Replace</span>
+        <span><kbd>?</kbd> All Shortcuts</span>
+      </div>
+      <div class="footer-status">
+        <span class="status-dot"></span>
+        <span id="systemStatusText">Engine ready</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- History Drawer -->
+  <aside id="historyDrawer" class="history-drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <h3>Correction History</h3>
+      </div>
+      <div class="drawer-header-actions">
+        <button id="clearHistoryBtn" class="btn-text-danger" title="Clear all history">Clear</button>
+        <button id="closeHistoryBtn" class="icon-btn" aria-label="Close History">&times;</button>
+      </div>
+    </div>
+    <div id="historyStorageNotice" class="drawer-subtitle">Last 20 corrections</div>
+    <div id="historyList" class="history-list">
+      <p class="history-empty">No history recorded yet.</p>
+    </div>
+  </aside>
+  <div id="drawerOverlay" class="drawer-overlay"></div>
+
+  <!-- Keyboard Shortcuts Modal -->
+  <div id="shortcutsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="shortcutsModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="shortcutsModalTitle">Keyboard Shortcuts</h3>
+        <button id="closeShortcutsBtn" class="icon-btn" aria-label="Close Shortcuts">&times;</button>
+      </div>
+      <div class="modal-body">
+        <table class="shortcuts-table">
+          <tr>
+            <td><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td>
+            <td>Run Grammar Check / Active Mode</td>
+          </tr>
+          <tr>
+            <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd></td>
+            <td>Copy Corrected Sentence</td>
+          </tr>
+          <tr>
+            <td><kbd>Ctrl</kbd> + <kbd>Z</kbd></td>
+            <td>Undo Text Replacement</td>
+          </tr>
+          <tr>
+            <td><kbd>Esc</kbd></td>
+            <td>Close Modals & History Drawer</td>
+          </tr>
+          <tr>
+            <td><kbd>?</kbd></td>
+            <td>Toggle this Shortcuts Cheatsheet</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings & API Key Modal -->
+  <div id="settingsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="settingsModalTitle">Settings & Configuration</h3>
+        <button id="closeSettingsBtn" class="icon-btn" aria-label="Close Settings">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="geminiApiKeyInput">
+            <strong>Google Gemini API Key</strong>
+          </label>
+          <p class="form-hint">
+            Save your Gemini API key here, then use Test Connection to verify it.
+          </p>
+          <p id="legacyApiKeyNotice" class="form-hint hidden">
+            A key from this browser was found. It is not used until you save it to your account, where it will be encrypted.
+          </p>
+          <div class="input-with-action">
+            <input 
+              type="password" 
+              id="geminiApiKeyInput" 
+              class="styled-input" 
+              placeholder="AIzaSy..." 
+              autocomplete="off"
+            >
+            <button id="toggleApiKeyVisibility" class="btn-secondary" type="button">Show</button>
+          </div>
+          <div class="api-links">
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Get a free Gemini API Key ↗</a>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><strong>System Prompt Status</strong></label>
+          <div class="system-prompt-preview">
+            <code>Verbatim system prompt loaded on backend matching specifications.</code>
+          </div>
+        </div>
+
+        <section id="accountSecuritySection" class="account-security">
+          <h4>Account security</h4>
+          <p id="accountSecurityStatus" class="form-hint">Sign in to manage account security.</p>
+          <button id="mfaSetupBtn" class="btn-secondary" type="button">Set up authenticator app</button>
+          <div id="mfaSetupPanel" class="mfa-setup hidden">
+            <img id="mfaQrCode" alt="Authenticator setup QR code">
+            <p class="form-hint">Or enter this key manually: <code id="mfaSecret"></code></p>
+            <label class="form-group" for="mfaEnableCode">Enter the 6-digit code to confirm</label>
+            <input id="mfaEnableCode" class="styled-input" inputmode="numeric" maxlength="6">
+            <button id="mfaEnableBtn" class="btn-primary" type="button">Enable MFA</button>
+          </div>
+          <div id="mfaRecoveryPanel" class="mfa-setup hidden">
+            <strong>Save your one-time recovery codes</strong>
+            <p class="form-hint">Each code works once. They will not be shown again.</p>
+            <pre id="mfaRecoveryCodes"></pre>
+            <button id="copyMfaRecoveryCodesBtn" class="btn-secondary" type="button">Copy recovery codes</button>
+          </div>
+          <div id="mfaDisablePanel" class="mfa-setup hidden">
+            <label class="form-group" for="mfaDisablePassword">Password</label>
+            <input id="mfaDisablePassword" class="styled-input" type="password" autocomplete="current-password">
+            <label class="form-group" for="mfaDisableCode">Authenticator or backup code</label>
+            <input id="mfaDisableCode" class="styled-input" inputmode="numeric" maxlength="6">
+            <button id="mfaDisableBtn" class="btn-secondary" type="button">Turn off MFA</button>
+          </div>
+          <p id="mfaStatusMsg" class="auth-status hidden" role="status"></p>
+        </section>
+
+        <div id="apiKeyStatusMsg" class="api-status-msg hidden"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="testApiBtn" class="btn-secondary">Test Connection</button>
+        <button id="saveApiKeyBtn" class="btn-primary">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Synonym Assistant Tooltip / Popover -->
+  <div id="synonymPopover" class="synonym-popover hidden" role="tooltip">
+    <div class="synonym-header">
+      <span class="synonym-title">💡 Synonyms for "<strong id="synonymWord">word</strong>"</span>
+      <button id="closeSynonymBtn" class="synonym-close" aria-label="Close synonyms">&times;</button>
+    </div>
+    <div id="synonymChips" class="synonym-chips">
+      <!-- Synonyms dynamically inserted here -->
+    </div>
+  </div>
+
+  <!-- =============== TRANSLATOR MODAL =============== -->
+  <div id="translatorModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="translatorTitle">
+    <div class="modal-panel translator-modal-panel">
+      <div class="modal-header">
+        <h2 id="translatorTitle" class="modal-title">🌐 Language Translator</h2>
+        <button id="closeTranslatorBtn" class="modal-close" aria-label="Close translator">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Language Pair Selector -->
+        <div class="translator-lang-row">
+          <div class="selector-group">
+            <label class="selector-label">From</label>
+            <select id="translateFromLang" class="styled-select">
+              <option value="en">🇬🇧 English</option>
+              <option value="mr">🇮🇳 Marathi</option>
+              <option value="hi">🇮🇳 Hindi</option>
+              <option value="es">🇪🇸 Spanish</option>
+              <option value="fr">🇫🇷 French</option>
+              <option value="de">🇩🇪 German</option>
+              <option value="ja">🇯🇵 Japanese</option>
+              <option value="zh">🇨🇳 Chinese</option>
+            </select>
+          </div>
+          <button id="swapLangBtn" class="swap-lang-btn" title="Swap languages" aria-label="Swap languages">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="17 1 21 5 17 9"></polyline>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+              <polyline points="7 23 3 19 7 15"></polyline>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+            </svg>
+          </button>
+          <div class="selector-group">
+            <label class="selector-label">To</label>
+            <select id="translateToLang" class="styled-select">
+              <option value="mr" selected>🇮🇳 Marathi</option>
+              <option value="en">🇬🇧 English</option>
+              <option value="hi">🇮🇳 Hindi</option>
+              <option value="es">🇪🇸 Spanish</option>
+              <option value="fr">🇫🇷 French</option>
+              <option value="de">🇩🇪 German</option>
+              <option value="ja">🇯🇵 Japanese</option>
+              <option value="zh">🇨🇳 Chinese</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Input / Output Areas -->
+        <div class="translator-io">
+          <div class="translator-io-box">
+            <label class="io-label" for="translateInput">Source Text</label>
+            <textarea id="translateInput" class="translator-textarea" placeholder="Type text to translate..." spellcheck="false"></textarea>
+            <div class="translator-box-footer">
+              <span id="translateCharCount" class="translate-count">0 chars</span>
+              <button id="translatePasteBtn" class="util-btn">📋 Paste from Editor</button>
+            </div>
+          </div>
+          <div class="translator-io-box">
+            <label class="io-label">Translation</label>
+            <div id="translateOutput" class="translator-output">
+              <span class="placeholder-text">Translation will appear here…</span>
+            </div>
+            <div class="translator-box-footer">
+              <span id="translateSourceLabel" class="translate-source-label">Powered by MyMemory (free)</span>
+              <button id="copyTranslationBtn" class="util-btn">📋 Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="translateClearBtn" class="btn-secondary">Clear</button>
+        <button id="translateBtn" class="btn-primary">
+          <span id="translateSpinner" class="btn-spinner hidden"></span>
+          🌐 Translate
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============== WORD OF THE DAY MODAL =============== -->
+  <div id="wordOfDayModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="wodTitle">
+    <div class="modal-panel wod-modal-panel">
+      <div class="modal-header">
+        <div>
+          <h2 id="wodTitle" class="modal-title">📚 Word of the Day</h2>
+          <p class="modal-subtitle" id="wodDate">Learn 5 English words with Marathi meanings</p>
+        </div>
+        <button id="closeWodBtn" class="modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="wodProgress" class="wod-progress-bar">
+          <div id="wodProgressFill" class="wod-progress-fill" style="width:0%"></div>
+        </div>
+        <div id="wodCards" class="wod-cards">
+          <!-- Word cards inserted dynamically -->
+          <div class="wod-loading">Loading today's words…</div>
+        </div>
+      </div>
+      <div class="modal-footer wod-footer">
+        <span id="wodCounter" class="wod-counter">Word 1 of 5</span>
+        <div class="wod-actions">
+          <button id="wodSkipBtn" class="btn-secondary">⏭ Already Know It</button>
+          <button id="wodNextBtn" class="btn-primary">Next Word →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Word-of-Day & Translator Quick-Access Buttons -->
+  <div class="floating-feature-btns">
+    <button id="openTranslatorBtn" class="fab-btn fab-translate" title="Open Translator" aria-label="Open Translator">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="2" y1="12" x2="22" y2="12"></line>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+      </svg>
+      <span>Translate</span>
+    </button>
+    <button id="openWodBtn" class="fab-btn fab-word" title="Word of the Day" aria-label="Word of the Day">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+      </svg>
+      <span>Daily Words</span>
+    </button>
+  </div>
+
+
+  <!-- Android Phone Bottom Navigation Bar (Fixed at bottom on mobile) -->
+  <nav class="android-bottom-nav" id="androidBottomNav" aria-label="Mobile Bottom Navigation">
+    <button class="bottom-nav-item active" data-tab="editor" id="bNavEditor" aria-controls="paneEditor" aria-current="page">
+      <div class="bottom-nav-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+      </div>
+      <span class="bottom-nav-label">Editor</span>
+    </button>
+
+    <button class="bottom-nav-item" data-tab="results" id="bNavResults" aria-controls="paneResults">
+      <div class="bottom-nav-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <span class="bottom-nav-badge hidden" id="bNavResultsBadge">0</span>
+      </div>
+      <span class="bottom-nav-label">Results</span>
+    </button>
+
+    <button class="bottom-nav-voice" id="bNavVoice" type="button" title="Voice input" aria-label="Start voice input" aria-pressed="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+        <line x1="12" y1="19" x2="12" y2="23"></line>
+        <line x1="8" y1="23" x2="16" y2="23"></line>
+      </svg>
+    </button>
+
+    <button class="bottom-nav-item" data-tab="daily-words" id="bNavWod" aria-controls="paneDailyWords">
+      <div class="bottom-nav-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+      </div>
+      <span class="bottom-nav-label">Words</span>
+    </button>
+
+    <button class="bottom-nav-item" data-tab="history" id="bNavHistory" aria-controls="paneHistory">
+      <div class="bottom-nav-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span class="bottom-nav-badge hidden" id="bNavHistoryBadge">0</span>
+      </div>
+      <span class="bottom-nav-label">History</span>
+    </button>
+  </nav>
+
+  <!-- Floating Toast Notifications -->
+  <div id="toastNotification" class="toast hidden" role="status" aria-live="polite">
+    <span id="toastIcon">📋</span>
+    <span id="toastMessage">Copied to clipboard!</span>
+  </div>
+
+  <script src="/vendor/jszip/jszip.min.js"></script>
+  <script src="/vendor/mammoth/mammoth.browser.min.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').catch(error => {
+          console.error('Could not register the offline app shell:', error);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
